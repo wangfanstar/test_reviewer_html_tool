@@ -1,0 +1,69 @@
+// 5. 解析任务列表
+            text = text.replace(/^- 
+$$
+( |x|X)
+$$
+ (.+)$/gm, (match, checked, content) => {
+                const isChecked = (checked.toLowerCase() === 'x') ? 'checked' : '';
+                return `<div class="task-item"><input type="checkbox" ${isChecked} disabled> ${content}</div>`;
+            });
+ 
+        // 5. 解析任务列表
+        text = text.replace(/^- \[( |x|X)\] (.+)$/gm, (match, checked, content) => {
+            const isChecked = (checked.toLowerCase() === 'x') ? 'checked' : '';
+            return `<div class="task-item"><input type="checkbox" ${isChecked} disabled> ${content}</div>`;
+
+			
+
+            // 10. 解析图片（必须在链接之前）
+            text = text.replace(/!
+$$
+([^
+$$
+]*)\]$([^)]+)$/g, '<img src="$2" alt="$1" class="markdown-img">');
+      
+
+        // 10. 解析图片（必须在链接之前）
+        text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="markdown-img">');
+
+		
+            // 11. 解析链接
+            text = text.replace(/
+$$
+([^
+$$
+]+)\]$([^)]+)$/g, '<a href="$2" target="_blank">$1</a>');
+        // 11. 解析链接
+        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+
+            
+            // 14. 解析脚注引用
+            text = text.replace(/
+$$
+\^(\w+)
+$$
+/g, '<sup class="footnote">[$1]</sup>');
+        // 14. 解析脚注引用
+        text = text.replace(/\[\^(\w+)\]/g, '<sup class="footnote">[$1]</sup>');
+
+
+            // 链接  
+            text = text.replace(/  
+$$  
+(.+?)  
+$$  
+$(.+?)$/g, '<a href="$2" target="_blank">$1</a>');  
+
+  // 链接 - 修复这一行
+    text = text.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+	
+	
+
+        
+
+
+
+		
+		
+		

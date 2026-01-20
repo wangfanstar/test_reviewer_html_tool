@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 测试用例评审工具 Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            padding: 20px 40px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 15px 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s;
+            min-width: 120px;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-value.critical {
+            color: var(--danger-color);
+        }
+
+        .stat-value.high {
+            color: var(--warning-color);
+        }
+
+        .stat-value.medium {
+            color: #ca8a04;
+        }
+
+        .stat-value.low {
+            color: #0284c7;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .toolbar {
+            padding: 20px 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #b45309;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .file-info {
+            padding: 15px 40px;
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            font-size: 14px;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        /* 二级标题标签页（显示在上方） */
+        .h2-tabs-container {
+            background: white;
+            border-bottom: 2px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: none;
+        }
+
+        .h2-tabs-container.active {
+            display: block;
+        }
+
+        .h2-tabs-header {
+            display: flex;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            overflow-x: auto;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .h2-tabs-header::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .h2-tabs-header::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .h2-tabs-header::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .h2-tab {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+            min-width: 140px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .h2-tab:hover {
+            background: #e0e7ff;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .h2-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px -4px rgba(102, 126, 234, 0.4);
+        }
+
+        .h2-tab-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .h2-tab-count {
+            font-size: 12px;
+            opacity: 0.75;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+
+        .h2-tab.active .h2-tab-count {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 500px);
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sidebar h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: #e0e7ff;
+            border-left-color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: #dbeafe;
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-item.level-3 {
+            padding-left: 25px;
+            font-size: 13px;
+            background: #f8fafc;
+        }
+
+        .nav-item.level-3:hover {
+            background: #e0e7ff;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title.level-2 {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+
+        .section-title.level-3 {
+            font-size: 16px;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .test-case {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .test-case:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .test-case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .test-case-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-critical {
+            background: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        .badge-high {
+            background: #fed7aa;
+            color: var(--warning-color);
+        }
+
+        .badge-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-low {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .test-case-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn-review {
+            background: #dbeafe;
+            color: var(--primary-color);
+        }
+
+        .action-btn-review:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .content {
+            line-height: 1.8;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            margin: 20px 0 15px 0;
+            color: var(--text-primary);
+        }
+
+        .content h1 {
+            font-size: 24px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .content h2 {
+            font-size: 22px;
+            color: var(--primary-color);
+        }
+
+        .content h3 {
+            font-size: 20px;
+        }
+
+        .content h4 {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+
+        .content h5 {
+            font-size: 16px;
+        }
+
+        .content h6 {
+            font-size: 14px;
+        }
+
+        .content p {
+            margin: 10px 0;
+        }
+
+        .content ul, .content ol {
+            margin: 10px 0 10px 25px;
+        }
+
+        .content li {
+            margin-bottom: 8px;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding: 10px 20px;
+            margin: 15px 0;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+            box-shadow: var(--shadow-sm);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .content thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .content th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .content td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content tbody tr:hover {
+            background: var(--bg-primary);
+        }
+
+        .content tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .content pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .content code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 13px;
+            color: #e11d48;
+        }
+
+        .content pre code {
+            background: transparent;
+            padding: 0;
+            color: #e2e8f0;
+        }
+
+        .content strong {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .content em {
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .content a {
+            color: var(--primary-color);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .content a:hover {
+            border-bottom-color: var(--primary-color);
+        }
+
+        .review-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .review-section.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .review-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s;
+        }
+
+        .review-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .review-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .review-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .review-meta input {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .review-list {
+            margin-top: 15px;
+        }
+
+        .review-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .review-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .review-item-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-secondary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+
+            .stats-bar {
+                padding: 15px 20px;
+            }
+
+            .toolbar {
+                padding: 15px 20px;
+            }
+
+            .content-area {
+                padding: 20px;
+            }
+
+            .h2-tabs-header {
+                justify-content: flex-start;
+                padding: 10px 20px;
+            }
+
+            .h2-tab {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 测试用例评审工具 Pro</h1>
+            <p>支持 Markdown 格式的测试用例文档管理、多条评审与导出</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="categoryCount">0</div>
+                <div class="stat-label">测试类别</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="testCaseCount">0</div>
+                <div class="stat-label">详细测试点</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value critical" id="criticalCount">0</div>
+                <div class="stat-label">关键</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value high" id="highCount">0</div>
+                <div class="stat-label">高</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value medium" id="mediumCount">0</div>
+                <div class="stat-label">中</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value low" id="lowCount">0</div>
+                <div class="stat-label">低</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="reviewCount">0</div>
+                <div class="stat-label">评审意见</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="h2TabCount">0</div>
+                <div class="stat-label">标签页</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                <span>📁</span> 导入文件
+            </button>
+            <input type="file" id="fileInput" accept=".md,.txt">
+            <button class="btn btn-success" onclick="reloadFile()">
+                <span>🔄</span> 刷新
+            </button>
+            <button class="btn btn-warning" onclick="exportHTMLWithReviews()">
+                <span>📤</span> 导出带评审
+            </button>
+            <button class="btn btn-warning" onclick="exportHTMLWithoutReviews()">
+                <span>📄</span> 导出无评审
+            </button>
+            <button class="btn btn-secondary" onclick="exportHTMLReviewsOnly()">
+                <span>📋</span> 导出评审文档
+            </button>
+            <button class="btn btn-success" onclick="exportMarkdownTemplate()">
+                <span>📝</span> 导出MD模板
+            </button>
+        </div>
+
+        <div class="file-info" id="fileInfo">
+            📁 未加载文件
+        </div>
+
+        <!-- 二级标题标签页（显示在上方） -->
+        <div class="h2-tabs-container" id="h2TabsContainer">
+            <div class="h2-tabs-header" id="h2TabsHeader"></div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>📑 章节导航</h3>
+                <div id="navContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div>暂无内容</div>
+                        <small>请导入 Markdown 文件</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div>加载中...</div>
+                </div>
+                <div id="contentContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📄</div>
+                        <div>暂无文档</div>
+                        <small>导入 Markdown 文件后，内容将在此处显示</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	    <script>
+        let currentFile = null;
+        let currentFileName = '';
+        let documentStructure = [];
+        let reviews = {};
+        let currentH2Tabs = [];
+        let activeTabId = null;
+        let h1Title = ''; // 存储H1标题，用于导出文件名
+
+        // 文件选择处理
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                currentFile = file;
+                currentFileName = file.name;
+                loadMarkdownFile(file);
+            }
+        });
+
+        // 加载 Markdown 文件
+        function loadMarkdownFile(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            const loading = document.getElementById('loading');
+            
+            loading.classList.add('active');
+            fileInfo.classList.add('active');
+            fileInfo.innerHTML = `📁 正在加载: ${file.name}`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                parseMarkdown(content);
+                fileInfo.innerHTML = `📁 已加载: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                loading.classList.remove('active');
+                updateStats();
+            };
+            reader.onerror = function() {
+                fileInfo.innerHTML = `❌ 加载失败: ${file.name}`;
+                fileInfo.style.background = '#fee2e2';
+                fileInfo.style.borderLeftColor = 'var(--danger-color)';
+                loading.classList.remove('active');
+            };
+            reader.readAsText(file);
+        }
+
+        // 解析 Markdown
+        function parseMarkdown(content) {
+            documentStructure = [];
+            currentH2Tabs = [];
+            h1Title = '';
+            const lines = content.split('\n');
+            
+            let currentH1 = null;
+            let currentH2 = null;
+            let currentH3 = null;
+            let contentBuffer = [];
+            let isInCodeBlock = false;
+            let codeBlockLang = '';
+            let codeBlockContent = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const trimmedLine = line.trim();
+
+                // 处理代码块
+                if (trimmedLine.startsWith('```')) {  
+                    if (!isInCodeBlock) {  
+                        isInCodeBlock = true;  
+                        codeBlockLang = trimmedLine.substring(3).trim();  
+                        codeBlockContent = [];  
+                    } else {  
+                        isInCodeBlock = false;  
+                        contentBuffer.push({  
+                            type: 'code',  
+                            lang: codeBlockLang,  
+                            content: codeBlockContent.join('\n')  
+                        });  
+                        codeBlockContent = [];  
+                        codeBlockLang = '';  
+                    }  
+                    continue;  
+                }  
+
+                if (isInCodeBlock) {  
+                    codeBlockContent.push(line);  
+                    continue;  
+                }  
+
+                // 检测标题  
+                if (trimmedLine.startsWith('#')) {  
+                    const level = trimmedLine.match(/^#+/)[0].length;  
+                    const titleText = trimmedLine.substring(level).trim();  
+                    
+                    if (level === 1) {  
+                        // H1: 保存之前的内容  
+                        saveCurrentContent(currentH3, currentH2, currentH1, contentBuffer);  
+                        contentBuffer = [];  
+                        
+                        // 保存H1标题用于导出文件名  
+                        if (!h1Title) {  
+                            h1Title = titleText;  
+                        }  
+                        
+                        currentH1 = {  
+                            id: `h1-${documentStructure.length}`,  
+                            level: 1,  
+                            title: titleText,  
+                            children: [],  
+                            content: []  
+                        };  
+                        documentStructure.push(currentH1);  
+                        currentH2 = null;  
+                        currentH3 = null;  
+                        
+                    } else if (level === 2) {  
+                        // H2: 保存之前的内容  
+                        saveCurrentContent(currentH3, currentH2, currentH1, contentBuffer);  
+                        contentBuffer = [];  
+                        
+                        currentH2 = {  
+                            id: `h2-${currentH2Tabs.length}-${Date.now()}`,  
+                            level: 2,  
+                            title: titleText,  
+                            children: [],  
+                            content: [],  
+                            parent: currentH1,  
+                            testCaseCount: 0,  
+                            h2Index: currentH2Tabs.length // 记录在H2列表中的位置  
+                        };  
+                        
+                        if (currentH1) {  
+                            currentH1.children.push(currentH2);  
+                        } else {  
+                            documentStructure.push(currentH2);  
+                        }  
+                        
+                        // 添加到H2标签页列表  
+                        currentH2Tabs.push(currentH2);  
+                        currentH3 = null;  
+                        
+                    } else if (level === 3) {  
+                        // H3: 保存之前的内容  
+                        saveCurrentContent(currentH3, currentH2, currentH1, contentBuffer);  
+                        contentBuffer = [];  
+                        
+                        const priority = detectPriority(titleText);  
+                        currentH3 = {  
+                            id: `h3-${currentH2 ? currentH2.id : 'root'}-${currentH2 ? currentH2.children.length : 0}-${Date.now()}`,  
+                            level: 3,  
+                            title: titleText,  
+                            priority: priority,  
+                            content: [],  
+                            parent: currentH2 || currentH1  
+                        };  
+                        
+                        // 增加H2的测试点计数  
+                        if (currentH2) {  
+                            currentH2.testCaseCount++;  
+                        }  
+                        
+                        if (currentH2) {  
+                            currentH2.children.push(currentH3);  
+                        } else if (currentH1) {  
+                            currentH1.children.push(currentH3);  
+                        } else {  
+                            documentStructure.push(currentH3);  
+                        }  
+                    } else {  
+                        // H4-H6: 作为普通内容  
+                        contentBuffer.push({  
+                            type: 'heading',  
+                            level: level,  
+                            content: titleText  
+                        });  
+                    }  
+                } else if (trimmedLine.startsWith('|')) {  
+                    // 表格处理  
+                    let tableLines = [line];  
+                    let j = i + 1;  
+                    
+                    while (j < lines.length && lines[j].trim().startsWith('|')) {  
+                        tableLines.push(lines[j]);  
+                        j++;  
+                    }  
+                    
+                    if (tableLines.length >= 2) {  
+                        contentBuffer.push({  
+                            type: 'table',  
+                            content: tableLines  
+                        });  
+                        i = j - 1;  
+                    }  
+                } else if (trimmedLine.startsWith('>')) {  
+                    // 引用块  
+                    contentBuffer.push({  
+                        type: 'blockquote',  
+                        content: trimmedLine.substring(1).trim()  
+                    });  
+                } else if (trimmedLine.match(/^[\*\-]\s/) || trimmedLine.match(/^\d+\.\s/)) {  
+                    // 列表项  
+                    contentBuffer.push({  
+                        type: 'list',  
+                        content: trimmedLine  
+                    });  
+                } else if (trimmedLine) {  
+                    // 普通段落  
+                    contentBuffer.push({  
+                        type: 'paragraph',  
+                        content: trimmedLine  
+                    });  
+                }  
+            }  
+
+            // 保存最后的内容  
+            saveCurrentContent(currentH3, currentH2, currentH1, contentBuffer);  
+
+            renderNavigation();  
+            renderContent();  
+            renderH2Tabs();  
+        }  
+
+        // 保存当前内容到对应的节点  
+        function saveCurrentContent(h3, h2, h1, buffer) {  
+            if (buffer.length === 0) return;  
+            
+            if (h3) {  
+                h3.content.push(...buffer);  
+            } else if (h2) {  
+                h2.content.push(...buffer);  
+            } else if (h1) {  
+                h1.content.push(...buffer);  
+            }  
+        }  
+
+        // 检测优先级  
+        function detectPriority(text) {  
+            const lowerText = text.toLowerCase();  
+            if (lowerText.includes('关键') || lowerText.includes('critical')) return 'critical';  
+            if (lowerText.includes('高') || lowerText.includes('high')) return 'high';  
+            if (lowerText.includes('中') || lowerText.includes('medium')) return 'medium';  
+            return 'low';  
+        }  
+
+        // 渲染导航（只显示当前H2的子标题）  
+        function renderNavigation() {  
+            const navContainer = document.getElementById('navContainer');  
+            if (documentStructure.length === 0) {  
+                navContainer.innerHTML = `  
+                    <div class="empty-state">  
+                        <div class="empty-state-icon">📭</div>  
+                        <div>暂无内容</div>  
+                        <small>请导入 Markdown 文件</small>  
+                    </div>  
+                `;  
+                return;  
+            }  
+
+            let navHTML = '';  
+            
+            // 如果选择了H2标签，只显示该H2的子标题  
+            if (activeTabId) {  
+                const activeH2 = currentH2Tabs.find(tab => tab.id === activeTabId);  
+                if (activeH2 && activeH2.children) {  
+                    // 显示H2标题  
+                    navHTML += `<div class="nav-item" onclick="scrollToSection('${activeH2.id}')" style="font-weight: bold; background: #dbeafe;">${activeH2.title}</div>`;  
+                    // 显示H3子标题  
+                    activeH2.children.forEach(child => {  
+                        navHTML += renderNavItem(child);  
+                    });  
+                }  
+            } else {  
+                // 显示所有内容  
+                documentStructure.forEach(item => {  
+                    navHTML += renderNavItem(item);  
+                });  
+            }  
+            
+            navContainer.innerHTML = navHTML || `  
+                <div class="empty-state">  
+                    <div class="empty-state-icon">📭</div>  
+                    <div>暂无子章节</div>  
+                </div>  
+            `;  
+        }  
+
+        // 渲染单个导航项  
+        function renderNavItem(item) {  
+            let html = '';  
+            const levelClass = item.level === 3 ? 'level-3' : '';  
+            
+            html += `<div class="nav-item ${levelClass}" onclick="scrollToSection('${item.id}')">  
+                ${item.title}  
+            </div>`;  
+            
+            return html;  
+        }  
+
+        // 滚动到指定章节  
+        function scrollToSection(id) {  
+            const element = document.getElementById(id);  
+            if (element) {  
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });  
+                
+                // 更新导航激活状态  
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));  
+                const navItem = document.querySelector(`[onclick="scrollToSection('${id}')"]`);  
+                if (navItem) navItem.classList.add('active');  
+            }  
+        }  
+
+        // 渲染内容  
+        function renderContent() {  
+            const container = document.getElementById('contentContainer');  
+            if (documentStructure.length === 0) {  
+                container.innerHTML = `  
+                    <div class="empty-state">  
+                        <div class="empty-state-icon">📄</div>  
+                        <div>暂无文档</div>  
+                        <small>导入 Markdown 文件后，内容将在此处显示</small>  
+                    </div>  
+                `;  
+                return;  
+            }  
+
+            let html = '';  
+            
+            // 如果选择了H2标签，只显示该H2及其子内容  
+            if (activeTabId) {  
+                const activeH2 = currentH2Tabs.find(tab => tab.id === activeTabId);  
+                if (activeH2) {  
+                    html = renderSection(activeH2);  
+                }  
+            } else {  
+                // 显示所有内容  
+                documentStructure.forEach(item => {  
+                    html += renderSection(item);  
+                });  
+            }  
+            
+            container.innerHTML = html;  
+        }  
+
+        // 渲染单个章节（修复：不递归渲染子节点，避免重复评审区域）  
+        function renderSection(item) {  
+            let html = '';  
+            
+            if (item.level === 3) {  
+                const isTestCase = item.title.includes('TC-');  
+                
+                if (isTestCase) {  
+                    // 带TC-的测试用例  
+                    html += `  
+                        <div class="test-case" id="${item.id}">  
+                            <div class="test-case-header">  
+                                <div class="test-case-title">  
+                                    <span>${item.title}</span>  
+                                    <span class="badge badge-${item.priority}">${getPriorityText(item.priority)}</span>  
+                                </div>  
+                                <div class="test-case-actions">  
+                                    <button class="action-btn action-btn-review" onclick="toggleReview('${item.id}')">  
+                                        💬 评审  
+                                    </button>  
+                                </div>  
+                            </div>  
+                            <div class="content">  
+                                ${renderContentArray(item.content)}  
+                            </div>  
+                            ${renderReviewSection(item.id)}  
+                        </div>  
+                    `;  
+                } else {  
+                    // 普通H3标题（也有评审按钮）  
+                    html += `  
+                        <div class="section" id="${item.id}">  
+                            <div class="section-header">  
+                                <div class="section-title level-3">  
+                                    📙 ${item.title}  
+                                </div>  
+                                <div class="section-actions">  
+                                    <button class="action-btn action-btn-review" onclick="toggleReview('${item.id}')">  
+                                        💬 评审  
+                                    </button>  
+                                </div>  
+                            </div>  
+                            <div class="content">  
+                                ${renderContentArray(item.content)}  
+                            </div>  
+                            ${renderReviewSection(item.id)}  
+                        </div>  
+                    `;  
+                }  
+            } else {  
+                // H1, H2 标题  
+                html += `  
+                    <div class="section" id="${item.id}">  
+                        <div class="section-header">  
+                            <div class="section-title level-${item.level}">  
+                                ${item.level === 1 ? '📘' : '📗'} ${item.title}  
+                            </div>  
+                        </div>  
+                        <div class="content">  
+                            ${renderContentArray(item.content)}  
+                        </div>  
+                    </div>  
+                `;  
+            }  
+            
+            // 递归渲染子节点  
+            if (item.children && item.children.length > 0) {  
+                item.children.forEach(child => {  
+                    html += renderSection(child);  
+                });  
+            }  
+            
+            return html;  
+        }  
+
+        // 渲染内容数组  
+        function renderContentArray(contentArray) {  
+            if (!contentArray || contentArray.length === 0) return '';  
+
+            let html = '';  
+            let currentList = null;  
+            let currentListType = null;  
+
+            contentArray.forEach(item => {  
+                if (item.type === 'table') {  
+                    if (currentList) {  
+                        html += `</${currentListType}>`;  
+                        currentList = null;  
+                        currentListType = null;  
+                    }  
+                    html += renderTable(item.content);  
+                } else if (item.type === 'code') {  
+                    if (currentList) {  
+                        html += `</${currentListType}>`;  
+                        currentList = null;  
+                        currentListType = null;  
+                    }  
+                    html += `<pre><code>${escapeHtml(item.content)}</code></pre>`;  
+                } else if (item.type === 'blockquote') {  
+                    if (currentList) {  
+                        html += `</${currentListType}>`;  
+                        currentList = null;  
+                        currentListType = null;  
+                    }  
+                    html += `<blockquote>${renderInlineMarkdown(item.content)}</blockquote>`;  
+                } else if (item.type === 'heading') {  
+                    if (currentList) {  
+                        html += `</${currentListType}>`;  
+                        currentList = null;  
+                        currentListType = null;  
+                    }  
+                    html += `<h${item.level}>${renderInlineMarkdown(item.content)}</h${item.level}>`;  
+                } else if (item.type === 'list') {  
+                    const isOrdered = /^\d+\.\s/.test(item.content);  
+                    const listType = isOrdered ? 'ol' : 'ul';  
+                    const listContent = item.content.replace(/^[\*\-\d\.]\s+/, '');  
+                    
+                    if (currentListType !== listType) {  
+                        if (currentList) {  
+                            html += `</${currentListType}>`;  
+                        }  
+                        html += `<${listType}>`;  
+                        currentListType = listType;  
+                    }  
+                    html += `<li>${renderInlineMarkdown(listContent)}</li>`;  
+                    currentList = true;  
+                } else if (item.type === 'paragraph') {  
+                    if (currentList) {  
+                        html += `</${currentListType}>`;  
+                        currentList = null;  
+                        currentListType = null;  
+                    }  
+                    html += `<p>${renderInlineMarkdown(item.content)}</p>`;  
+                }  
+            });  
+
+            if (currentList) {  
+                html += `</${currentListType}>`;  
+            }  
+
+            return html;  
+        }  
+
+        // 渲染表格  
+        function renderTable(lines) {  
+            if (lines.length < 2) return '';  
+
+            let html = '<table>';  
+            
+            // 解析表头  
+            const headerCells = lines[0].split('|').filter(cell => cell.trim());  
+            html += '<thead><tr>';  
+            headerCells.forEach(cell => {  
+                html += `<th>${renderInlineMarkdown(cell.trim())}</th>`;  
+            });  
+            html += '</tr></thead>';  
+
+            // 跳过分隔行，处理数据行  
+            html += '<tbody>';  
+            for (let i = 2; i < lines.length; i++) {  
+                const cells = lines[i].split('|').filter(cell => cell.trim());  
+                if (cells.length > 0) {  
+                    html += '<tr>';  
+                    cells.forEach(cell => {  
+                        html += `<td>${renderInlineMarkdown(cell.trim())}</td>`;  
+                    });  
+                    html += '</tr>';  
+                }  
+            }  
+            html += '</tbody></table>';  
+
+            return html;  
+        }  
+
+        // 渲染内联 Markdown  
+        function renderInlineMarkdown(text) {  
+            // 加粗  
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');  
+            // 斜体  
+            text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');  
+            // 行内代码  
+            text = text.replace(/`(.+?)`/g, '<code>$1</code>');  
+            // 链接  
+            text = text.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>'); 
+            // 删除线  
+            text = text.replace(/~~(.+?)~~/g, '<del>$1</del>');  
+            
+            return text;  
+        }  
+
+        // HTML 转义  
+        function escapeHtml(text) {  
+            const div = document.createElement('div');  
+            div.textContent = text;  
+            return div.innerHTML;  
+        }  
+
+        // 获取优先级文本  
+        function getPriorityText(priority) {  
+            const map = {  
+                'critical': '关键',  
+                'high': '高',  
+                'medium': '中',  
+                'low': '低'  
+            };  
+            return map[priority] || '低';  
+        }  
+		        // 渲染评审区域
+        function renderReviewSection(id) {
+            return `
+                <div class="review-section" id="review-${id}">
+                    <textarea class="review-input" placeholder="输入评审意见..." id="review-input-${id}"></textarea>
+                    <div class="review-footer">
+                        <div class="review-meta">
+                            <input type="text" placeholder="评审人" id="reviewer-${id}" value="匿名">
+                            <input type="date" id="review-date-${id}" value="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="review-actions">
+                            <button class="btn btn-primary" onclick="saveReview('${id}')">💾 保存评审</button>
+                            <button class="btn btn-secondary" onclick="toggleReview('${id}')">❌ 取消</button>
+                        </div>
+                    </div>
+                    <div class="review-list" id="review-list-${id}">
+                        ${renderReviews(id)}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 切换评审区域
+        function toggleReview(id) {
+            const reviewSection = document.getElementById(`review-${id}`);
+            if (reviewSection) {
+                reviewSection.classList.toggle('active');
+            }
+        }
+
+        // 保存评审
+        function saveReview(id) {
+            const input = document.getElementById(`review-input-${id}`);
+            const reviewer = document.getElementById(`reviewer-${id}`);
+            const date = document.getElementById(`review-date-${id}`);
+            
+            const reviewText = input.value.trim();
+            if (!reviewText) {
+                alert('请输入评审意见');
+                return;
+            }
+
+            if (!reviews[id]) {
+                reviews[id] = [];
+            }
+
+            reviews[id].push({
+                text: reviewText,
+                reviewer: reviewer.value,
+                date: date.value,
+                timestamp: new Date().toISOString()
+            });
+
+            input.value = '';
+            renderReviewList(id);
+            updateStats();
+            
+            alert('评审意见已保存');
+        }
+
+        // 渲染评审列表
+        function renderReviews(id) {
+            if (!reviews[id] || reviews[id].length === 0) {
+                return '';
+            }
+
+            return reviews[id].map((review, index) => `
+                <div class="review-item">
+                    <div class="review-item-header">
+                        <span>👤 ${review.reviewer}</span>
+                        <span>📅 ${review.date}</span>
+                        <span style="cursor: pointer;" onclick="deleteReview('${id}', ${index})">🗑️</span>
+                    </div>
+                    <div class="review-item-content">${escapeHtml(review.text)}</div>
+                </div>
+            `).join('');
+        }
+
+        // 更新评审列表
+        function renderReviewList(id) {
+            const container = document.getElementById(`review-list-${id}`);
+            if (container) {
+                container.innerHTML = renderReviews(id);
+            }
+        }
+
+        // 删除评审
+        function deleteReview(id, index) {
+            if (confirm('确定要删除这条评审意见吗？')) {
+                reviews[id].splice(index, 1);
+                renderReviewList(id);
+                updateStats();
+            }
+        }
+
+        // 渲染H2标签页
+        function renderH2Tabs() {
+            const tabsContainer = document.getElementById('h2TabsContainer');
+            const tabsHeader = document.getElementById('h2TabsHeader');
+
+            if (currentH2Tabs.length === 0) {
+                tabsContainer.classList.remove('active');
+                return;
+            }
+
+            tabsContainer.classList.add('active');
+
+            // 渲染标签页头部
+            // 第1个和最后一个标签不显示测试点数量
+            tabsHeader.innerHTML = currentH2Tabs.map((h2, index) => {
+                const isFirst = index === 0;
+                const isLast = index === currentH2Tabs.length - 1;
+                const showCount = !isFirst && !isLast;
+                
+                return `
+                    <div class="h2-tab ${index === 0 && !activeTabId ? 'active' : (h2.id === activeTabId ? 'active' : '')}" onclick="switchH2Tab('${h2.id}')">
+                        <div class="h2-tab-title">${h2.title}</div>
+                        ${showCount ? `<div class="h2-tab-count">${h2.testCaseCount} 个测试点</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // 如果没有激活的标签，默认激活第一个
+            if (!activeTabId && currentH2Tabs.length > 0) {
+                activeTabId = currentH2Tabs[0].id;
+            }
+        }
+
+        // 切换H2标签页
+        function switchH2Tab(tabId) {
+            activeTabId = tabId;
+            
+            // 更新标签页激活状态
+            document.querySelectorAll('.h2-tab').forEach(tab => tab.classList.remove('active'));
+            const activeTab = document.querySelector(`[onclick="switchH2Tab('${tabId}')"]`);
+            if (activeTab) activeTab.classList.add('active');
+            
+            // 重新渲染导航和内容区域
+            renderNavigation();
+            renderContent();
+            
+            // 滚动到内容区域顶部
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                contentArea.scrollTop = 0;
+            }
+        }
+
+        // 更新统计
+        function updateStats() {
+            // 测试类别数（除第一个和最后一个H2外的H2数量）
+            let categoryCount = 0;
+            if (currentH2Tabs.length > 2) {
+                categoryCount = currentH2Tabs.length - 2;
+            }
+            
+            // 详细测试点数（只统计中间H2下的H3数量，排除第一个和最后一个H2）
+            let testCaseCount = 0;
+            let criticalCount = 0;
+            let highCount = 0;
+            let mediumCount = 0;
+            let lowCount = 0;
+            
+            // 只统计中间的H2（排除第一个和最后一个）
+            if (currentH2Tabs.length > 2) {
+                for (let i = 1; i < currentH2Tabs.length - 1; i++) {
+                    const h2 = currentH2Tabs[i];
+                    if (h2.children) {
+                        h2.children.forEach(h3 => {
+                            if (h3.level === 3) {
+                                testCaseCount++;
+                                // 统计优先级
+                                if (h3.priority === 'critical') criticalCount++;
+                                else if (h3.priority === 'high') highCount++;
+                                else if (h3.priority === 'medium') mediumCount++;
+                                else if (h3.priority === 'low') lowCount++;
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // 评审意见总数
+            let totalReviews = 0;
+            Object.values(reviews).forEach(reviewArray => {
+                totalReviews += reviewArray.length;
+            });
+            
+            // 标签页数量（H2数量）
+            const h2Count = currentH2Tabs.length;
+            
+            document.getElementById('categoryCount').textContent = categoryCount;
+            document.getElementById('testCaseCount').textContent = testCaseCount;
+            document.getElementById('criticalCount').textContent = criticalCount;
+            document.getElementById('highCount').textContent = highCount;
+            document.getElementById('mediumCount').textContent = mediumCount;
+            document.getElementById('lowCount').textContent = lowCount;
+            document.getElementById('reviewCount').textContent = totalReviews;
+            document.getElementById('h2TabCount').textContent = h2Count;
+        }
+
+        // 刷新文件
+        function reloadFile() {
+            if (currentFile) {
+                reviews = {};
+                currentH2Tabs = [];
+                activeTabId = null;
+                h1Title = '';
+                loadMarkdownFile(currentFile);
+            } else {
+                alert('请先导入文件');
+            }
+        }
+
+        // 生成HTML模板（带左侧导航）
+        function generateHTMLTemplate(contentHTML, navHTML, title) {
+            const styles = document.querySelector('style').innerHTML;
+            
+            return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        ${styles}
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary);
+        }
+        
+        .export-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .export-sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .export-content {
+            margin-left: 280px;
+            padding: 40px;
+            flex: 1;
+            background: var(--bg-primary);
+        }
+        
+        .export-nav-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--primary-color);
+        }
+        
+        .export-nav-item {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            text-decoration: none;
+            display: block;
+            color: var(--text-primary);
+        }
+        
+        .export-nav-item:hover {
+            background: #e0e7ff;
+            border-left-color: var(--primary-color);
+            transform: translateX(5px);
+        }
+        
+        .export-nav-item.level-2 {
+            padding-left: 25px;
+            font-size: 13px;
+        }
+        
+        .export-nav-item.level-3 {
+            padding-left: 40px;
+            font-size: 12px;
+        }
+        
+        .document-header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .document-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .document-info {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .document-info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="export-container">
+        <div class="export-sidebar">
+            <div class="export-nav-title">📑 目录导航</div>
+            ${navHTML}
+        </div>
+        
+        <div class="export-content">
+            <div class="document-header">
+                <h1>${title}</h1>
+                <div class="document-info">
+                    <p>📁 文件: ${currentFileName}</p>
+                    <p>📅 导出时间: ${new Date().toLocaleString()}</p>
+                </div>
+            </div>
+            
+            ${contentHTML}
+        </div>
+    </div>
+    
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    <\/script>
+</body>
+</html>`;
+        }
+
+        // 生成导航HTML（递归生成所有层级，修复ID问题）
+        function generateNavHTML(items, parentIndex = '') {
+            let html = '';
+            items.forEach((item, index) => {
+                const currentIndex = parentIndex ? `${parentIndex}.${index + 1}` : `${index + 1}`;
+                let levelClass = '';
+                if (item.level === 2) levelClass = 'level-2';
+                else if (item.level === 3) levelClass = 'level-3';
+                
+                html += `<a href="#${item.id}" class="export-nav-item ${levelClass}">${item.title}</a>`;
+                
+                if (item.children && item.children.length > 0) {
+                    html += generateNavHTML(item.children, currentIndex);
+                }
+            });
+            return html;
+        }
+
+        // 导出 HTML 带评审
+        function exportHTMLWithReviews() {
+            if (documentStructure.length === 0) {
+                alert('没有可导出的内容');
+                return;
+            }
+
+            // 临时清除activeTabId，导出所有内容
+            const tempActiveTabId = activeTabId;
+            activeTabId = null;
+
+            let contentHTML = '';
+            documentStructure.forEach(item => {
+                contentHTML += generateExportSection(item, true);
+            });
+
+            const navHTML = generateNavHTML(documentStructure);
+            const exportTitle = h1Title || '测试用例文档';
+            const html = generateHTMLTemplate(contentHTML, navHTML, `📋 ${exportTitle}（含评审）`);
+            downloadFile(html, `${exportTitle}_带评审.html`, 'text/html');
+
+            // 恢复activeTabId
+            activeTabId = tempActiveTabId;
+        }
+
+        // 导出 HTML 无评审
+        function exportHTMLWithoutReviews() {
+            if (documentStructure.length === 0) {
+                alert('没有可导出的内容');
+                return;
+            }
+
+            // 临时清除activeTabId，导出所有内容
+            const tempActiveTabId = activeTabId;
+            activeTabId = null;
+
+            let contentHTML = '';
+            documentStructure.forEach(item => {
+                contentHTML += generateExportSection(item, false);
+            });
+
+            const navHTML = generateNavHTML(documentStructure);
+            const exportTitle = h1Title || '测试用例文档';
+            const html = generateHTMLTemplate(contentHTML, navHTML, `📋 ${exportTitle}`);
+            downloadFile(html, `${exportTitle}.html`, 'text/html');
+
+            // 恢复activeTabId
+            activeTabId = tempActiveTabId;
+        }
+
+        // 导出评审文档
+        function exportHTMLReviewsOnly() {
+            let totalReviews = 0;
+            Object.values(reviews).forEach(r => totalReviews += r.length);
+
+            if (totalReviews === 0) {
+                alert('没有评审意见可导出');
+                return;
+            }
+
+            let contentHTML = '';
+            let navItems = [];
+
+            function collectReviewedItems(item) {
+                if (reviews[item.id] && reviews[item.id].length > 0) {
+                    navItems.push(item);
+                }
+                if (item.children) {
+                    item.children.forEach(child => collectReviewedItems(child));
+                }
+            }
+
+            documentStructure.forEach(item => collectReviewedItems(item));
+
+            // 生成带评审的内容HTML
+            documentStructure.forEach(item => {
+                contentHTML += generateExportSection(item, true, true);
+            });
+
+            const navHTML = generateNavHTML(navItems);
+            const exportTitle = h1Title || '测试用例文档';
+            const html = generateHTMLTemplate(contentHTML, navHTML, `📝 ${exportTitle}_评审意见汇总`);
+            downloadFile(html, `${exportTitle}_评审意见汇总.html`, 'text/html');
+        }
+		        // 生成导出章节HTML（修复：正确处理子节点，避免重复ID）
+        function generateExportSection(item, includeReviews, reviewOnly = false) {
+            let html = '';
+            
+            // 如果是仅评审模式，且当前节点及其子节点都没有评审，则跳过
+            if (reviewOnly && !hasReviews(item)) {
+                return '';
+            }
+            
+            if (item.level === 3) {
+                const isTestCase = item.title.includes('TC-');
+                
+                // 仅评审模式下，如果当前项没有评审，跳过
+                if (reviewOnly && (!reviews[item.id] || reviews[item.id].length === 0)) {
+                    return '';
+                }
+                
+                if (isTestCase) {
+                    // 带TC-的测试用例
+                    html += `
+                        <div class="test-case" id="${item.id}">
+                            <div class="test-case-header">
+                                <div class="test-case-title">
+                                    <span>${item.title}</span>
+                                    <span class="badge badge-${item.priority}">${getPriorityText(item.priority)}</span>
+                                </div>
+                            </div>
+                            ${!reviewOnly ? `<div class="content">${renderContentArray(item.content)}</div>` : ''}
+                            ${includeReviews && reviews[item.id] && reviews[item.id].length > 0 ? `
+                                <div style="margin-top: 20px; padding: 20px; background: #fef3c7; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+                                    <h4 style="color: var(--warning-color); margin-bottom: 15px;">📝 评审意见</h4>
+                                    ${reviews[item.id].map(review => `
+                                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary-color);">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary);">
+                                                <span>👤 ${review.reviewer}</span>
+                                                <span>📅 ${review.date}</span>
+                                            </div>
+                                            <div style="color: var(--text-primary); line-height: 1.6; white-space: pre-wrap;">${escapeHtml(review.text)}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    // 普通H3
+                    html += `
+                        <div class="section" id="${item.id}">
+                            <div class="section-header">
+                                <div class="section-title level-3">
+                                    📙 ${item.title}
+                                </div>
+                            </div>
+                            ${!reviewOnly ? `<div class="content">${renderContentArray(item.content)}</div>` : ''}
+                            ${includeReviews && reviews[item.id] && reviews[item.id].length > 0 ? `
+                                <div style="margin-top: 20px; padding: 20px; background: #fef3c7; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+                                    <h4 style="color: var(--warning-color); margin-bottom: 15px;">📝 评审意见</h4>
+                                    ${reviews[item.id].map(review => `
+                                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary-color);">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary);">
+                                                <span>👤 ${review.reviewer}</span>
+                                                <span>📅 ${review.date}</span>
+                                            </div>
+                                            <div style="color: var(--text-primary); line-height: 1.6; white-space: pre-wrap;">${escapeHtml(review.text)}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+            } else {
+                // H1, H2 标题
+                // 仅评审模式下，如果当前项及子项都没有评审，跳过
+                if (reviewOnly && !hasReviews(item)) {
+                    return '';
+                }
+                
+                html += `
+                    <div class="section" id="${item.id}">
+                        <div class="section-header">
+                            <div class="section-title level-${item.level}">
+                                ${item.level === 1 ? '📘' : '📗'} ${item.title}
+                            </div>
+                        </div>
+                        ${!reviewOnly ? `<div class="content">${renderContentArray(item.content)}</div>` : ''}
+                        ${includeReviews && reviews[item.id] && reviews[item.id].length > 0 ? `
+                            <div style="margin-top: 20px; padding: 20px; background: #fef3c7; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+                                <h4 style="color: var(--warning-color); margin-bottom: 15px;">📝 评审意见</h4>
+                                ${reviews[item.id].map(review => `
+                                    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary-color);">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary);">
+                                            <span>👤 ${review.reviewer}</span>
+                                            <span>📅 ${review.date}</span>
+                                        </div>
+                                        <div style="color: var(--text-primary); line-height: 1.6; white-space: pre-wrap;">${escapeHtml(review.text)}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            // 递归处理子节点
+            if (item.children && item.children.length > 0) {
+                item.children.forEach(child => {
+                    html += generateExportSection(child, includeReviews, reviewOnly);
+                });
+            }
+
+            return html;
+        }
+
+        // 检查节点或其子节点是否有评审
+        function hasReviews(item) {
+            if (reviews[item.id] && reviews[item.id].length > 0) {
+                return true;
+            }
+            if (item.children && item.children.length > 0) {
+                return item.children.some(child => hasReviews(child));
+            }
+            return false;
+        }
+
+        // 导出 Markdown 模板
+        function exportMarkdownTemplate() {
+            const template = `# 测试用例文档模板
+
+## 功能概览
+
+### 💡 功能说明
+
+在此处描述功能的主要作用和背景。
+
+**主要作用1：** 功能描述  
+**主要作用2：** 功能描述
+
+### 🎯 支持范围
+
+| 项目 | 配置 | 支持情况 | 说明 |
+|------|------|---------|------|
+| 项目1 | 配置1 | 完全支持 | 详细说明 |
+| 项目2 | 配置2 | 部分支持 | 详细说明 |
+
+### 🔄 工作原理
+
+> 这是一个引用块，用于强调重要信息
+
+#### 1. 正常模式
+
+\`\`\`
+在此处添加示意图或代码
+可以使用 ASCII 图形
+\`\`\`
+
+#### 2. 降级模式
+
+\`\`\`python
+def example():
+    print("代码示例")
+\`\`\`
+
+### ⚠️ 关键约束
+
+- 约束条件1
+- 约束条件2  
+- 约束条件3
+
+---
+
+## 测试用例
+
+### TC-MODULE-FUNC-001 功能测试用例标题 关键
+
+#### 📋 测试目的
+描述测试的主要目的和验证点。
+
+#### 🔧 配置说明
+
+| 寄存器 | 地址 | 位域 | 功能 | 默认值 |
+|--------|------|------|------|--------|
+| REG_NAME | 0x1000 | [15:0] | 功能描述 | 0x0000 |
+
+#### 🔬 测试步骤
+
+1. 步骤1：操作描述
+2. 步骤2：操作描述
+3. 步骤3：操作描述
+
+#### ✅ 通过标准
+
+- 标准1：期望结果
+- 标准2：期望结果
+
+---
+
+### TC-MODULE-FUNC-002 另一个测试用例 高
+
+#### 📋 测试目的
+测试目的描述。
+
+#### 🔬 测试步骤
+
+- 步骤1
+- 步骤2
+
+#### ✅ 通过标准
+
+1. 期望结果1
+2. 期望结果2
+
+---
+
+## 边界条件测试
+
+### TC-MODULE-BOUND-001 边界测试用例 中
+
+#### 📋 测试目的
+测试边界条件下的系统行为。
+
+#### 🔬 测试步骤
+
+1. 配置到最大值
+2. 配置到最小值
+3. 验证边界行为
+
+#### ✅ 通过标准
+
+- 边界值处理正确
+- 无溢出或错误
+
+---
+
+### 其他测试点
+
+可以添加不带TC-前缀的测试点，同样支持评审功能。
+
+---
+
+## 使用说明
+
+### 📝 编写规范
+
+1. **测试用例ID命名**：TC-[模块]-[功能]-[序号]
+2. **优先级标识**：关键/高/中/低
+3. **章节结构**：
+   - 使用 # 作为一级标题（导出html文件的文件名）
+   - 使用 ## 作为二级标题（会显示为标签页）
+   - 使用 ### 作为三级标题（详细测试点，所有三级标题都有评审按钮）
+4. **表格格式**：标准 Markdown 表格语法
+
+### 🎨 支持的 Markdown 语法
+
+- **加粗**: \`**文本**\`
+- *斜体*: \`*文本*\`
+- \`行内代码\`: \`\\\`代码\\\`\`
+- [链接](url): \`[文本](url)\`
+- > 引用: \`> 引用内容\`
+- ~~删除线~~: \`~~文本~~\`
+
+### 📊 统计说明
+
+- **测试类别**：除第一个和最后一个二级标题外的二级标题数量
+- **详细测试点**：除第一个和最后一个二级标题外，中间二级标题下的三级标题总数
+- **优先级统计**：关键/高/中/低，只统计中间二级标题下的三级标题
+- **标签页**：二级标题数量（第1个和最后1个不显示测试点数量）
+- **章节导航**：只显示当前选中标签页的三级标题
+
+### 📋 示例文档结构
+
+\`\`\`
+# 测试用例文档标题 ← H1（作为导出文件名）
+├── ## 功能概览 ← H2（第1个，不计入测试类别）
+│   └── ### 功能说明 ← H3（不计入详细测试点）
+├── ## 测试用例 ← H2（第2个，计入测试类别）
+│   ├── ### TC-001 测试点1 关键 ← H3（计入详细测试点和优先级统计）
+│   └── ### TC-002 测试点2 高 ← H3（计入详细测试点和优先级统计）
+├── ## 边界测试 ← H2（第3个，计入测试类别）
+│   └── ### TC-003 测试点3 中 ← H3（计入详细测试点和优先级统计）
+└── ## 使用说明 ← H2（最后1个，不计入测试类别）
+    └── ### 说明 ← H3（不计入详细测试点）
+\`\`\`
+
+---
+
+*模板版本: 5.1*  
+*更新日期: ${new Date().toLocaleDateString()}*
+`;
+
+            downloadFile(template, '测试用例模板.md', 'text/markdown');
+        }
+
+        // 下载文件
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 初始化
+        updateStats();
+    </script>
+</body>
+</html>
