@@ -47,6 +47,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px 40px;
+            position: relative;
         }
 
         .header h1 {
@@ -62,6 +63,30 @@
             font-size: 14px;
         }
 
+        .header-help-btn {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-help-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
         .stats-bar {
             display: flex;
             gap: 15px;
@@ -69,8 +94,23 @@
             background: var(--bg-primary);
             border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
+        }
+
+        .stats-left-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stats-right-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-left: 30px;
         }
 
         .stat-item {
@@ -894,6 +934,20 @@
                 flex-direction: column;
                 align-items: center;
             }
+
+            .stats-left-group,
+            .stats-right-group {
+                width: 100%;
+                justify-content: center;
+                margin-left: 0;
+            }
+
+            .header-help-btn {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
@@ -902,10 +956,13 @@
         <div class="header">
             <h1>📋 测试用例评审工具 Pro</h1>
             <p>支持 Markdown 格式的测试用例文档管理、多条评审与导出</p>
+            <button class="header-help-btn" onclick="showHelp()">
+                <span>❓</span> 使用说明
+            </button>
         </div>
 
         <div class="stats-bar">
-            <div class="stats-with-toggle">
+            <div class="stats-left-group">
                 <div class="stat-item">
                     <div class="stat-value" id="categoryCount">0</div>
                     <div class="stat-label">测试类别</div>
@@ -922,6 +979,8 @@
                     <div class="stat-value" id="h2TabCount">0</div>
                     <div class="stat-label">标签页</div>
                 </div>
+            </div>
+            <div class="stats-right-group">
                 <div class="stat-item">
                     <div class="stat-value critical" id="criticalCount">0</div>
                     <div class="stat-label">关键</div>
@@ -1841,6 +1900,50 @@
             document.getElementById('lowCount').textContent = lowCount;
             document.getElementById('reviewCount').textContent = totalReviews;
             document.getElementById('h2TabCount').textContent = h2Count;
+        }
+
+        // 显示使用说明
+        function showHelp() {
+            const helpContent = `
+📋 测试用例评审工具使用说明
+
+【基本功能】
+1. 导入文件：点击"导入MD文件"按钮，选择Markdown格式的测试用例文档
+2. 评审功能：在每个测试点下方点击"评审"按钮，输入评审意见并保存
+3. 导出功能：支持导出带评审的HTML、无评审的HTML、纯评审HTML、评审TXT等格式
+
+【文档结构要求】
+- 使用 # 作为一级标题（导出html文件的文件名）
+- 使用 ## 作为二级标题（会显示为标签页）
+- 使用 ### 作为三级标题（详细测试点，所有三级标题都有评审按钮）
+- 测试用例ID命名：TC-[模块]-[功能]-[序号]
+- 优先级标识：关键/高/中/低
+
+【统计说明】
+- 测试类别：除第一个和最后一个二级标题外的二级标题数量
+- 详细测试点：除第一个和最后一个二级标题外，中间二级标题下的三级标题总数
+- 优先级统计：关键/高/中/低，只统计中间二级标题下的三级标题
+- 标签页：二级标题数量（第1个和最后1个不显示测试点数量）
+
+【评审功能】
+- 每个测试点都可以添加多条评审意见
+- 支持设置评审人和评审日期
+- 可以删除已保存的评审意见
+- 点击"显示所有评审"可以一键显示/隐藏所有评审区域
+
+【导入导出】
+- 导入评审TXT：可以从之前导出的评审文件恢复评审数据
+- 导出评审TXT：可以将所有评审意见导出为文本文件，便于备份和分享
+- 导出HTML：支持多种格式，导出文档顶部会包含完整的统计数据
+
+【快捷键提示】
+- 点击章节导航可以快速跳转到对应章节
+- 点击标签页可以切换不同的测试类别
+- 使用悬浮的导入/导出按钮可以快速访问常用功能
+
+如有问题，请查看导出的MD模板了解详细的文档格式要求。
+            `;
+            alert(helpContent);
         }
 
         // 刷新文件
