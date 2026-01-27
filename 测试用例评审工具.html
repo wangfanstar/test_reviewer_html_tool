@@ -1375,7 +1375,14 @@
                 });  
             }  
             
-            container.innerHTML = html;  
+            container.innerHTML = html;
+            
+            // 如果显示所有评审模式开启，渲染后也要显示所有评审
+            if (allReviewsVisible) {
+                setTimeout(() => {
+                    showAllReviewSections();
+                }, 50);
+            }
         }  
 
         // 渲染单个章节（修复：不递归渲染子节点，避免重复评审区域）  
@@ -1617,59 +1624,47 @@
 
         // 一键显示/隐藏所有评审
         let allReviewsVisible = false;
-        let savedActiveTabId = null; // 保存之前的activeTabId
         
         function toggleAllReviews() {
             const btn = document.getElementById('toggleAllReviewsBtn');
             
             if (!allReviewsVisible) {
-                // 显示所有评审：清除activeTabId限制，渲染所有H2标签页的内容
-                savedActiveTabId = activeTabId;
-                activeTabId = null; // 清除限制，渲染所有标签页的内容
-                renderContent(); // 重新渲染所有内容，包括所有H2标签页的评审区域
-                renderNavigation(); // 更新导航，显示所有章节
+                // 显示所有评审：保持当前标签页，只显示所有评审区域
+                allReviewsVisible = true;
                 
-                // 等待DOM更新后，显示所有评审区域
-                setTimeout(() => {
-                    const allReviewSections = document.querySelectorAll('.review-section');
-                    allReviewSections.forEach(section => {
-                        section.classList.add('active');
-                    });
-                    
-                    allReviewsVisible = true;
-                    if (btn) {
-                        btn.innerHTML = '<span>🙈</span> 隐藏所有评审';
-                    }
-                }, 50);
+                // 显示当前可见的所有评审区域
+                showAllReviewSections();
+                
+                if (btn) {
+                    btn.innerHTML = '<span>🙈</span> 隐藏所有评审';
+                }
             } else {
-                // 隐藏所有评审：隐藏所有评审区域，恢复之前的标签页状态
-                const allReviewSections = document.querySelectorAll('.review-section');
-                allReviewSections.forEach(section => {
-                    section.classList.remove('active');
-                });
-                
-                // 恢复之前的activeTabId
-                if (savedActiveTabId !== null) {
-                    activeTabId = savedActiveTabId;
-                } else if (currentH2Tabs.length > 0) {
-                    activeTabId = currentH2Tabs[0].id;
-                }
-                
-                renderContent(); // 重新渲染，恢复到之前的标签页视图
-                renderNavigation(); // 更新导航
-                
-                // 恢复标签页的激活状态
-                document.querySelectorAll('.h2-tab').forEach(tab => tab.classList.remove('active'));
-                if (activeTabId) {
-                    const activeTab = document.querySelector(`[onclick="switchH2Tab('${activeTabId}')"]`);
-                    if (activeTab) activeTab.classList.add('active');
-                }
-                
+                // 隐藏所有评审：隐藏所有评审区域
                 allReviewsVisible = false;
+                
+                // 隐藏所有评审区域
+                hideAllReviewSections();
+                
                 if (btn) {
                     btn.innerHTML = '<span>👁️</span> 显示所有评审';
                 }
             }
+        }
+        
+        // 显示所有评审区域
+        function showAllReviewSections() {
+            const allReviewSections = document.querySelectorAll('.review-section');
+            allReviewSections.forEach(section => {
+                section.classList.add('active');
+            });
+        }
+        
+        // 隐藏所有评审区域
+        function hideAllReviewSections() {
+            const allReviewSections = document.querySelectorAll('.review-section');
+            allReviewSections.forEach(section => {
+                section.classList.remove('active');
+            });
         }
 
         // 保存评审
@@ -1780,6 +1775,13 @@
             // 重新渲染导航和内容区域
             renderNavigation();
             renderContent();
+            
+            // 如果显示所有评审模式开启，切换标签页后也要显示所有评审
+            if (allReviewsVisible) {
+                setTimeout(() => {
+                    showAllReviewSections();
+                }, 50);
+            }
             
             // 滚动到内容区域顶部
             const contentArea = document.querySelector('.content-area');
