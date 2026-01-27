@@ -70,6 +70,7 @@
             border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
         }
 
         .stat-item {
@@ -120,10 +121,85 @@
         .toolbar {
             padding: 20px 40px;
             display: flex;
-            gap: 15px;
+            gap: 20px;
             flex-wrap: wrap;
             border-bottom: 1px solid var(--border-color);
             background: white;
+            align-items: flex-start;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .toolbar-left {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toolbar-right {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toolbar-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 0 auto;
+        }
+
+        .toolbar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .toolbar-group-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toolbar-group-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toolbar-group-buttons .btn {
+            width: 100%;
+            justify-content: flex-start;
+            font-size: 13px;
+            padding: 8px 15px;
+        }
+
+        .stats-with-toggle {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -803,6 +879,21 @@
             .h2-tab {
                 min-width: 120px;
             }
+
+            .toolbar-left,
+            .toolbar-right {
+                position: relative;
+                left: auto;
+                right: auto;
+                top: auto;
+                transform: none;
+                margin: 10px 0;
+            }
+
+            .stats-with-toggle {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -814,60 +905,91 @@
         </div>
 
         <div class="stats-bar">
-            <div class="stat-item">
-                <div class="stat-value" id="categoryCount">0</div>
-                <div class="stat-label">测试类别</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="testCaseCount">0</div>
-                <div class="stat-label">详细测试点</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value critical" id="criticalCount">0</div>
-                <div class="stat-label">关键</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value high" id="highCount">0</div>
-                <div class="stat-label">高</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value medium" id="mediumCount">0</div>
-                <div class="stat-label">中</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value low" id="lowCount">0</div>
-                <div class="stat-label">低</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="reviewCount">0</div>
-                <div class="stat-label">评审意见</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="h2TabCount">0</div>
-                <div class="stat-label">标签页</div>
+            <div class="stats-with-toggle">
+                <div class="stat-item">
+                    <div class="stat-value" id="categoryCount">0</div>
+                    <div class="stat-label">测试类别</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="testCaseCount">0</div>
+                    <div class="stat-label">详细测试点</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="reviewCount">0</div>
+                    <div class="stat-label">评审意见</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="h2TabCount">0</div>
+                    <div class="stat-label">标签页</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value critical" id="criticalCount">0</div>
+                    <div class="stat-label">关键</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value high" id="highCount">0</div>
+                    <div class="stat-label">高</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value medium" id="mediumCount">0</div>
+                    <div class="stat-label">中</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value low" id="lowCount">0</div>
+                    <div class="stat-label">低</div>
+                </div>
+                <button class="btn btn-secondary" id="toggleAllReviewsBtn" onclick="toggleAllReviews()">
+                    <span>👁️</span> 显示所有评审
+                </button>
             </div>
         </div>
 
         <div class="toolbar">
-            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                <span>📁</span> 导入文件
-            </button>
-            <input type="file" id="fileInput" accept=".md,.txt">
-            <button class="btn btn-success" onclick="reloadFile()">
-                <span>🔄</span> 刷新
-            </button>
-            <button class="btn btn-warning" onclick="exportHTMLWithReviews()">
-                <span>📤</span> 导出带评审
-            </button>
-            <button class="btn btn-warning" onclick="exportHTMLWithoutReviews()">
-                <span>📄</span> 导出无评审
-            </button>
-            <button class="btn btn-secondary" onclick="exportHTMLReviewsOnly()">
-                <span>📋</span> 导出评审文档
-            </button>
-            <button class="btn btn-success" onclick="exportMarkdownTemplate()">
-                <span>📝</span> 导出MD模板
-            </button>
+            <div class="toolbar-center"></div>
+        </div>
+
+        <!-- 左侧悬浮导入按钮 -->
+        <div class="toolbar-left">
+            <div class="toolbar-group">
+                <div class="toolbar-group-title">📥 导入功能</div>
+                <div class="toolbar-group-buttons">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <span>📁</span> 导入MD文件
+                    </button>
+                    <input type="file" id="fileInput" accept=".md,.txt" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('reviewTxtInput').click()">
+                        <span>📥</span> 导入评审TXT
+                    </button>
+                    <input type="file" id="reviewTxtInput" accept=".txt" style="display: none;">
+                    <button class="btn btn-success" onclick="reloadFile()">
+                        <span>🔄</span> 刷新文档
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧悬浮导出按钮 -->
+        <div class="toolbar-right">
+            <div class="toolbar-group">
+                <div class="toolbar-group-title">📤 导出功能</div>
+                <div class="toolbar-group-buttons">
+                    <button class="btn btn-warning" onclick="exportHTMLWithReviews()">
+                        <span>📤</span> 导出文档带评审HTML
+                    </button>
+                    <button class="btn btn-warning" onclick="exportHTMLWithoutReviews()">
+                        <span>📄</span> 导出文档无评审HTML
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportHTMLReviewsOnly()">
+                        <span>📋</span> 导出纯评审HTML
+                    </button>
+                    <button class="btn btn-primary" onclick="exportReviewsTxt()">
+                        <span>💾</span> 导出评审TXT
+                    </button>
+                    <button class="btn btn-success" onclick="exportMarkdownTemplate()">
+                        <span>📝</span> 导出MD模板
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="file-info" id="fileInfo">
@@ -922,6 +1044,14 @@
                 currentFile = file;
                 currentFileName = file.name;
                 loadMarkdownFile(file);
+            }
+        });
+
+        // 评审TXT文件选择处理
+        document.getElementById('reviewTxtInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                importReviewsTxt(file);
             }
         });
 
@@ -1485,6 +1615,63 @@
             }
         }
 
+        // 一键显示/隐藏所有评审
+        let allReviewsVisible = false;
+        let savedActiveTabId = null; // 保存之前的activeTabId
+        
+        function toggleAllReviews() {
+            const btn = document.getElementById('toggleAllReviewsBtn');
+            
+            if (!allReviewsVisible) {
+                // 显示所有评审：清除activeTabId限制，渲染所有H2标签页的内容
+                savedActiveTabId = activeTabId;
+                activeTabId = null; // 清除限制，渲染所有标签页的内容
+                renderContent(); // 重新渲染所有内容，包括所有H2标签页的评审区域
+                renderNavigation(); // 更新导航，显示所有章节
+                
+                // 等待DOM更新后，显示所有评审区域
+                setTimeout(() => {
+                    const allReviewSections = document.querySelectorAll('.review-section');
+                    allReviewSections.forEach(section => {
+                        section.classList.add('active');
+                    });
+                    
+                    allReviewsVisible = true;
+                    if (btn) {
+                        btn.innerHTML = '<span>🙈</span> 隐藏所有评审';
+                    }
+                }, 50);
+            } else {
+                // 隐藏所有评审：隐藏所有评审区域，恢复之前的标签页状态
+                const allReviewSections = document.querySelectorAll('.review-section');
+                allReviewSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // 恢复之前的activeTabId
+                if (savedActiveTabId !== null) {
+                    activeTabId = savedActiveTabId;
+                } else if (currentH2Tabs.length > 0) {
+                    activeTabId = currentH2Tabs[0].id;
+                }
+                
+                renderContent(); // 重新渲染，恢复到之前的标签页视图
+                renderNavigation(); // 更新导航
+                
+                // 恢复标签页的激活状态
+                document.querySelectorAll('.h2-tab').forEach(tab => tab.classList.remove('active'));
+                if (activeTabId) {
+                    const activeTab = document.querySelector(`[onclick="switchH2Tab('${activeTabId}')"]`);
+                    if (activeTab) activeTab.classList.add('active');
+                }
+                
+                allReviewsVisible = false;
+                if (btn) {
+                    btn.innerHTML = '<span>👁️</span> 显示所有评审';
+                }
+            }
+        }
+
         // 保存评审
         function saveReview(id) {
             const input = document.getElementById(`review-input-${id}`);
@@ -1511,8 +1698,6 @@
             input.value = '';
             renderReviewList(id);
             updateStats();
-            
-            alert('评审意见已保存');
         }
 
         // 渲染评审列表
@@ -1669,9 +1854,110 @@
             }
         }
 
+        // 获取统计数据
+        function getStatsData() {
+            // 测试类别数（除第一个和最后一个H2外的H2数量）
+            let categoryCount = 0;
+            if (currentH2Tabs.length > 2) {
+                categoryCount = currentH2Tabs.length - 2;
+            }
+            
+            // 详细测试点数（只统计中间H2下的H3数量，排除第一个和最后一个H2）
+            let testCaseCount = 0;
+            let criticalCount = 0;
+            let highCount = 0;
+            let mediumCount = 0;
+            let lowCount = 0;
+            
+            // 只统计中间的H2（排除第一个和最后一个）
+            if (currentH2Tabs.length > 2) {
+                for (let i = 1; i < currentH2Tabs.length - 1; i++) {
+                    const h2 = currentH2Tabs[i];
+                    if (h2.children) {
+                        h2.children.forEach(h3 => {
+                            if (h3.level === 3) {
+                                testCaseCount++;
+                                // 统计优先级
+                                if (h3.priority === 'critical') criticalCount++;
+                                else if (h3.priority === 'high') highCount++;
+                                else if (h3.priority === 'medium') mediumCount++;
+                                else if (h3.priority === 'low') lowCount++;
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // 评审意见总数
+            let totalReviews = 0;
+            Object.values(reviews).forEach(reviewArray => {
+                totalReviews += reviewArray.length;
+            });
+            
+            // 标签页数量（H2数量）
+            const h2Count = currentH2Tabs.length;
+            
+            return {
+                categoryCount,
+                testCaseCount,
+                criticalCount,
+                highCount,
+                mediumCount,
+                lowCount,
+                totalReviews,
+                h2Count
+            };
+        }
+
         // 生成HTML模板（带左侧导航）
-        function generateHTMLTemplate(contentHTML, navHTML, title) {
+        function generateHTMLTemplate(contentHTML, navHTML, title, stats = null) {
             const styles = document.querySelector('style').innerHTML;
+            
+            // 如果没有传入统计数据，自动获取
+            if (!stats) {
+                stats = getStatsData();
+            }
+            
+            // 生成统计信息HTML
+            const statsHTML = stats ? `
+            <div style="background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); padding: 25px; border-radius: 12px; margin-bottom: 30px; box-shadow: var(--shadow-md);">
+                <h2 style="color: var(--primary-color); margin-bottom: 20px; font-size: 20px;">📊 文档统计数据</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: var(--primary-color);">${stats.categoryCount}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">测试类别</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: var(--primary-color);">${stats.testCaseCount}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">详细测试点</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: var(--danger-color);">${stats.criticalCount}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">关键</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: var(--warning-color);">${stats.highCount}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">高</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: #ca8a04;">${stats.mediumCount}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">中</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: #0284c7;">${stats.lowCount}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">低</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: var(--primary-color);">${stats.totalReviews}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">评审意见</div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <div style="font-size: 28px; font-weight: bold; color: var(--primary-color);">${stats.h2Count}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">标签页</div>
+                    </div>
+                </div>
+            </div>
+            ` : '';
             
             return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -1791,6 +2077,8 @@
                 </div>
             </div>
             
+            ${statsHTML}
+            
             ${contentHTML}
         </div>
     </div>
@@ -1846,7 +2134,8 @@
 
             const navHTML = generateNavHTML(documentStructure);
             const exportTitle = h1Title || '测试用例文档';
-            const html = generateHTMLTemplate(contentHTML, navHTML, `📋 ${exportTitle}（含评审）`);
+            const stats = getStatsData();
+            const html = generateHTMLTemplate(contentHTML, navHTML, `📋 ${exportTitle}（含评审）`, stats);
             downloadFile(html, `${exportTitle}_带评审.html`, 'text/html');
 
             // 恢复activeTabId
@@ -1871,7 +2160,8 @@
 
             const navHTML = generateNavHTML(documentStructure);
             const exportTitle = h1Title || '测试用例文档';
-            const html = generateHTMLTemplate(contentHTML, navHTML, `📋 ${exportTitle}`);
+            const stats = getStatsData();
+            const html = generateHTMLTemplate(contentHTML, navHTML, `📋 ${exportTitle}`, stats);
             downloadFile(html, `${exportTitle}.html`, 'text/html');
 
             // 恢复activeTabId
@@ -1909,7 +2199,8 @@
 
             const navHTML = generateNavHTML(navItems);
             const exportTitle = h1Title || '测试用例文档';
-            const html = generateHTMLTemplate(contentHTML, navHTML, `📝 ${exportTitle}_评审意见汇总`);
+            const stats = getStatsData();
+            const html = generateHTMLTemplate(contentHTML, navHTML, `📝 ${exportTitle}_评审意见汇总`, stats);
             downloadFile(html, `${exportTitle}_评审意见汇总.html`, 'text/html');
         }
 		        // 生成导出章节HTML（修复：正确处理子节点，避免重复ID）
@@ -2216,6 +2507,435 @@ def example():
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // 导出评审为TXT文件
+        function exportReviewsTxt() {
+            let totalReviews = 0;
+            Object.values(reviews).forEach(r => totalReviews += r.length);
+
+            if (totalReviews === 0) {
+                alert('没有评审意见可导出');
+                return;
+            }
+
+            // 构建TXT内容
+            let txtContent = '';
+            txtContent += '========================================\n';
+            txtContent += '测试用例评审文件\n';
+            txtContent += '========================================\n';
+            txtContent += `导出时间: ${new Date().toLocaleString()}\n`;
+            txtContent += `文件: ${currentFileName || '未命名文件'}\n`;
+            txtContent += `评审总数: ${totalReviews}\n`;
+            txtContent += '========================================\n\n';
+
+            // 遍历所有评审
+            const missingTitles = [];
+            Object.keys(reviews).forEach(sectionId => {
+                const sectionReviews = reviews[sectionId];
+                if (sectionReviews && sectionReviews.length > 0) {
+                    // 查找对应的章节标题
+                    let sectionTitle = findSectionTitle(sectionId);
+                    
+                    // 如果找不到标题，记录警告
+                    if (sectionTitle === '未知章节') {
+                        missingTitles.push(sectionId);
+                        console.warn(`导出时无法找到章节ID ${sectionId} 的标题`);
+                    }
+                    
+                    txtContent += `\n【章节ID: ${sectionId}】\n`;
+                    txtContent += `章节标题: ${sectionTitle}\n`;
+                    txtContent += `${'='.repeat(50)}\n\n`;
+
+                    sectionReviews.forEach((review, index) => {
+                        txtContent += `评审 #${index + 1}\n`;
+                        txtContent += `评审人: ${review.reviewer}\n`;
+                        txtContent += `日期: ${review.date}\n`;
+                        txtContent += `时间戳: ${review.timestamp}\n`;
+                        txtContent += `评审内容:\n${review.text}\n`;
+                        txtContent += `${'-'.repeat(50)}\n\n`;
+                    });
+                }
+            });
+
+            // 如果有找不到标题的章节，给出提示
+            if (missingTitles.length > 0) {
+                console.warn(`导出时，有 ${missingTitles.length} 个章节无法找到标题，这些评审在导入时可能无法正确匹配`);
+            }
+
+            txtContent += '\n========================================\n';
+            txtContent += '文件结束\n';
+            txtContent += '========================================\n';
+
+            const exportTitle = h1Title || '测试用例文档';
+            downloadFile(txtContent, `${exportTitle}_评审意见.txt`, 'text/plain');
+        }
+
+        // 查找章节标题（改进版：在所有可能的位置查找）
+        function findSectionTitle(sectionId) {
+            // 首先在documentStructure中查找
+            function searchInItems(items) {
+                for (let item of items) {
+                    if (item.id === sectionId) {
+                        return item.title;
+                    }
+                    if (item.children && item.children.length > 0) {
+                        const found = searchInItems(item.children);
+                        if (found && found !== '未知章节') return found;
+                    }
+                }
+                return null;
+            }
+            
+            let title = searchInItems(documentStructure);
+            if (title) return title;
+            
+            // 如果没找到，尝试在currentH2Tabs中查找（包括所有H2标签页）
+            for (let h2 of currentH2Tabs) {
+                if (h2.id === sectionId) {
+                    return h2.title;
+                }
+                if (h2.children) {
+                    for (let h3 of h2.children) {
+                        if (h3.id === sectionId) {
+                            return h3.title;
+                        }
+                    }
+                }
+            }
+            
+            // 如果还是没找到，尝试通过ID特征推断（作为最后手段）
+            console.warn(`无法找到章节ID ${sectionId} 对应的标题`);
+            return '未知章节';
+        }
+
+        // 从TXT文件导入评审
+        function importReviewsTxt(file) {
+            // 检查是否已加载文档
+            if (documentStructure.length === 0) {
+                alert('请先导入测试用例文档（Markdown文件）');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    console.log('开始解析评审文件...');
+                    const importedCount = parseReviewsTxt(content);
+                    console.log(`解析完成，尝试导入 ${importedCount} 条评审`);
+                    
+                    if (importedCount === 0) {
+                        alert('文件中没有找到有效的评审内容');
+                        return;
+                    }
+                    
+                    // 检查导入的章节ID是否在当前文档中存在
+                    const missingSections = [];
+                    const foundSections = [];
+                    Object.keys(reviews).forEach(sectionId => {
+                        if (findSectionInStructure(sectionId)) {
+                            foundSections.push(sectionId);
+                        } else {
+                            missingSections.push(sectionId);
+                        }
+                    });
+                    console.log('找到的章节ID:', foundSections);
+                    console.log('未找到的章节ID:', missingSections);
+                    
+                    // 统计实际映射成功的评审数量
+                    let actualMappedCount = 0;
+                    Object.values(reviews).forEach(reviewArray => {
+                        actualMappedCount += reviewArray.length;
+                    });
+                    console.log('实际映射成功的评审数量:', actualMappedCount);
+                    
+                    // 先重新渲染内容，确保所有DOM元素存在
+                    // 这会使用最新的reviews数据来渲染评审列表
+                    renderContent();
+                    
+                    // 确保所有评审列表都已更新（双重保险）
+                    setTimeout(() => {
+                        Object.keys(reviews).forEach(id => {
+                            const container = document.getElementById(`review-list-${id}`);
+                            if (container) {
+                                const reviewsHTML = renderReviews(id);
+                                container.innerHTML = reviewsHTML;
+                            }
+                        });
+                        updateStats();
+                    }, 100);
+                    
+                    updateStats();
+                    
+                    let message = `评审文件导入成功！\n共解析 ${importedCount} 条评审，成功映射 ${actualMappedCount} 条到当前文档`;
+                    if (missingSections.length > 0) {
+                        message += `\n\n注意：有 ${missingSections.length} 个章节在当前文档中未找到匹配的标题`;
+                    }
+                    alert(message);
+                } catch (error) {
+                    alert('导入失败：' + error.message);
+                    console.error('导入错误:', error);
+                }
+            };
+            reader.onerror = function() {
+                alert('文件读取失败');
+            };
+            reader.readAsText(file);
+        }
+
+        // 检查章节是否在文档结构中存在
+        function findSectionInStructure(sectionId) {
+            function searchInItems(items) {
+                for (let item of items) {
+                    if (item.id === sectionId) {
+                        return true;
+                    }
+                    if (item.children && item.children.length > 0) {
+                        if (searchInItems(item.children)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            return searchInItems(documentStructure);
+        }
+
+        // 解析评审TXT文件
+        function parseReviewsTxt(content) {
+            // 临时存储：按标题存储评审，最后再映射到新的ID
+            const reviewsByTitle = {};
+            let currentSectionTitle = null;
+            let currentSectionId = null; // 旧ID，仅用于临时存储
+            let currentReview = null;
+            let inReviewContent = false;
+            let reviewContentLines = [];
+            let importedCount = 0;
+
+            const lines = content.split('\n');
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const trimmedLine = line.trim();
+
+                // 跳过空行
+                if (!trimmedLine) {
+                    // 如果正在收集评审内容，空行也应该保留
+                    if (inReviewContent && currentReview) {
+                        reviewContentLines.push(line);
+                    }
+                    continue;
+                }
+
+                // 跳过分隔线（但需要处理作为评审结束标记的分隔线）
+                if (trimmedLine.match(/^[=\-]+$/)) {
+                    // 如果遇到分隔线且正在收集评审内容，结束当前评审
+                    if (inReviewContent && currentReview && currentSectionTitle) {
+                        currentReview.text = reviewContentLines.join('\n').trim();
+                        if (currentReview.text) {
+                            if (!reviewsByTitle[currentSectionTitle]) {
+                                reviewsByTitle[currentSectionTitle] = [];
+                            }
+                            reviewsByTitle[currentSectionTitle].push(currentReview);
+                            importedCount++;
+                        }
+                        currentReview = null;
+                        reviewContentLines = [];
+                        inReviewContent = false;
+                    }
+                    continue;
+                }
+
+                // 检测章节ID和标题
+                if (trimmedLine.startsWith('【章节ID:') && trimmedLine.includes('】')) {
+                    // 保存上一个评审（如果有）
+                    if (currentReview && currentSectionTitle && reviewContentLines.length > 0) {
+                        currentReview.text = reviewContentLines.join('\n').trim();
+                        if (currentReview.text) {
+                            if (!reviewsByTitle[currentSectionTitle]) {
+                                reviewsByTitle[currentSectionTitle] = [];
+                            }
+                            reviewsByTitle[currentSectionTitle].push(currentReview);
+                            importedCount++;
+                        }
+                    }
+                    
+                    // 解析章节ID（旧ID，仅用于记录）
+                    const idMatch = trimmedLine.match(/【章节ID:\s*([^\】]+)】/);
+                    if (idMatch) {
+                        currentSectionId = idMatch[1].trim();
+                    }
+                    currentSectionTitle = null; // 重置标题，等待下一行
+                    currentReview = null;
+                    reviewContentLines = [];
+                    inReviewContent = false;
+                    continue;
+                }
+
+                // 检测章节标题
+                if (trimmedLine.startsWith('章节标题:')) {
+                    currentSectionTitle = trimmedLine.replace('章节标题:', '').trim();
+                    if (!reviewsByTitle[currentSectionTitle]) {
+                        reviewsByTitle[currentSectionTitle] = [];
+                    }
+                    continue;
+                }
+
+                // 检测评审开始
+                if (trimmedLine.startsWith('评审 #')) {
+                    // 保存上一个评审
+                    if (currentReview && currentSectionTitle && reviewContentLines.length > 0) {
+                        currentReview.text = reviewContentLines.join('\n').trim();
+                        if (currentReview.text) {
+                            if (!reviewsByTitle[currentSectionTitle]) {
+                                reviewsByTitle[currentSectionTitle] = [];
+                            }
+                            reviewsByTitle[currentSectionTitle].push(currentReview);
+                            importedCount++;
+                        }
+                    }
+                    // 开始新评审
+                    currentReview = {
+                        text: '',
+                        reviewer: '匿名',
+                        date: new Date().toISOString().split('T')[0],
+                        timestamp: new Date().toISOString()
+                    };
+                    reviewContentLines = [];
+                    inReviewContent = false;
+                    continue;
+                }
+
+                // 解析评审元数据
+                if (currentReview && !inReviewContent) {
+                    if (trimmedLine.startsWith('评审人:')) {
+                        currentReview.reviewer = trimmedLine.replace('评审人:', '').trim() || '匿名';
+                        continue;
+                    }
+                    if (trimmedLine.startsWith('日期:')) {
+                        const dateStr = trimmedLine.replace('日期:', '').trim();
+                        if (dateStr) {
+                            currentReview.date = dateStr;
+                        }
+                        continue;
+                    }
+                    if (trimmedLine.startsWith('时间戳:')) {
+                        const timestampStr = trimmedLine.replace('时间戳:', '').trim();
+                        if (timestampStr) {
+                            currentReview.timestamp = timestampStr;
+                        }
+                        continue;
+                    }
+                    if (trimmedLine === '评审内容:') {
+                        inReviewContent = true;
+                        continue;
+                    }
+                }
+
+                // 收集评审内容
+                if (inReviewContent && currentReview) {
+                    reviewContentLines.push(line); // 保留原始格式，包括缩进和空行
+                }
+            }
+
+            // 保存最后一个评审
+            if (currentReview && currentSectionTitle && reviewContentLines.length > 0) {
+                currentReview.text = reviewContentLines.join('\n').trim();
+                if (currentReview.text) {
+                    if (!reviewsByTitle[currentSectionTitle]) {
+                        reviewsByTitle[currentSectionTitle] = [];
+                    }
+                    reviewsByTitle[currentSectionTitle].push(currentReview);
+                    importedCount++;
+                }
+            }
+
+            // 将按标题存储的评审映射到当前文档中的新ID
+            console.log('按标题存储的评审:', reviewsByTitle);
+            const mappedCount = mapReviewsByTitleToIds(reviewsByTitle);
+            console.log('映射后的reviews对象:', reviews);
+            console.log(`成功映射 ${mappedCount} 条评审到当前文档的章节ID`);
+
+            return importedCount;
+        }
+
+        // 根据标题将评审映射到当前文档中的章节ID
+        function mapReviewsByTitleToIds(reviewsByTitle) {
+            let mappedCount = 0;
+            const unmappedTitles = [];
+
+            // 标准化标题（去除emoji、多余空格等，用于模糊匹配）
+            function normalizeTitle(title) {
+                if (!title) return '';
+                // 去除emoji（保留中文字符、英文字母、数字、常见标点）
+                return title.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+            }
+
+            // 递归查找章节ID的函数（支持精确匹配和模糊匹配）
+            function findIdByTitle(items, targetTitle, useFuzzy = false) {
+                for (let item of items) {
+                    let match = false;
+                    if (useFuzzy) {
+                        // 模糊匹配：去除emoji后比较
+                        const normalizedTarget = normalizeTitle(targetTitle);
+                        const normalizedItem = normalizeTitle(item.title);
+                        match = normalizedTarget === normalizedItem && normalizedTarget.length > 0;
+                    } else {
+                        // 精确匹配
+                        match = item.title === targetTitle;
+                    }
+                    
+                    if (match) {
+                        return item.id;
+                    }
+                    if (item.children && item.children.length > 0) {
+                        const found = findIdByTitle(item.children, targetTitle, useFuzzy);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+
+            // 遍历所有按标题存储的评审
+            Object.keys(reviewsByTitle).forEach(title => {
+                // 跳过"未知章节"
+                if (title === '未知章节') {
+                    console.warn('跳过"未知章节"的评审，因为无法确定对应的章节');
+                    unmappedTitles.push(title);
+                    return;
+                }
+
+                // 先尝试精确匹配
+                let sectionId = findIdByTitle(documentStructure, title, false);
+                
+                // 如果精确匹配失败，尝试模糊匹配
+                if (!sectionId) {
+                    sectionId = findIdByTitle(documentStructure, title, true);
+                }
+
+                if (sectionId) {
+                    // 找到匹配的章节ID，将评审添加到reviews对象
+                    if (!reviews[sectionId]) {
+                        reviews[sectionId] = [];
+                    }
+                    // 合并评审（避免重复）
+                    reviewsByTitle[title].forEach(review => {
+                        reviews[sectionId].push(review);
+                        mappedCount++;
+                    });
+                    console.log(`成功匹配标题 "${title}" 到章节ID ${sectionId}`);
+                } else {
+                    unmappedTitles.push(title);
+                    console.warn(`无法匹配标题: "${title}"`);
+                }
+            });
+
+            if (unmappedTitles.length > 0) {
+                console.warn('以下章节标题在当前文档中未找到匹配:', unmappedTitles);
+            }
+
+            return mappedCount;
         }
 
         // 初始化
