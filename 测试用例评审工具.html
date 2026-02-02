@@ -1055,6 +1055,9 @@
                     <button class="btn btn-secondary" onclick="exportHTMLReviewsOnly()">
                         <span>📋</span> 导出纯评审HTML
                     </button>
+                    <button class="btn btn-primary" onclick="exportDocWithReviewsTxt()">
+                        <span>📄</span> 导出带评审TXT
+                    </button>
                     <button class="btn btn-primary" onclick="exportReviewsTxt()">
                         <span>💾</span> 导出评审TXT
                     </button>
@@ -2761,6 +2764,88 @@ def example():
         }
 
         // 导出评审为TXT文件
+        // 将章节内容数组转换为纯文本
+        function contentArrayToPlainText(contentArray) {
+            if (!contentArray || contentArray.length === 0) return '';
+            let text = '';
+            contentArray.forEach(item => {
+                if (item.type === 'paragraph') {
+                    text += (item.content || '').trim() + '\n';
+                } else if (item.type === 'heading') {
+                    text += '\n' + '#'.repeat(item.level || 1) + ' ' + (item.content || '') + '\n';
+                } else if (item.type === 'code') {
+                    text += '\n```\n' + (item.content || '') + '\n```\n';
+                } else if (item.type === 'blockquote') {
+                    text += '> ' + (item.content || '') + '\n';
+                } else if (item.type === 'list') {
+                    text += (item.content || '') + '\n';
+                } else if (item.type === 'table' && item.content && item.content.length >= 2) {
+                    item.content.forEach(line => {
+                        text += line + '\n';
+                    });
+                    text += '\n';
+                }
+            });
+            return text;
+        }
+
+        // 递归生成带评审的文档TXT（章节+内容+评审）
+        function sectionToTxtWithReviews(item, indent) {
+            let txt = '';
+            const prefix = indent || '';
+            if (item.title) {
+                const level = item.level || 1;
+                txt += prefix + '#'.repeat(level) + ' ' + item.title + '\n\n';
+            }
+            if (item.content && item.content.length > 0) {
+                txt += prefix + contentArrayToPlainText(item.content);
+            }
+            if (reviews[item.id] && reviews[item.id].length > 0) {
+                txt += prefix + '【评审意见】\n';
+                reviews[item.id].forEach((review, index) => {
+                    txt += prefix + `  ${index + 1}. [${review.reviewer} ${review.date}]\n`;
+                    txt += prefix + '    ' + (review.text || '').replace(/\n/g, '\n    ') + '\n\n';
+                });
+            }
+            if (item.children && item.children.length > 0) {
+                item.children.forEach(child => {
+                    txt += sectionToTxtWithReviews(child, prefix);
+                });
+            }
+            return txt;
+        }
+
+        // 导出带评审TXT（文档内容+评审意见）
+        function exportDocWithReviewsTxt() {
+            if (documentStructure.length === 0) {
+                alert('没有可导出的内容，请先导入MD文件');
+                return;
+            }
+
+            let txtContent = '';
+            txtContent += '========================================\n';
+            txtContent += (h1Title || '测试用例文档') + ' - 带评审\n';
+            txtContent += '========================================\n';
+            txtContent += `导出时间: ${new Date().toLocaleString()}\n`;
+            txtContent += `源文件: ${currentFileName || '未命名'}\n`;
+            let totalReviews = 0;
+            Object.values(reviews).forEach(r => totalReviews += r.length);
+            txtContent += `评审总数: ${totalReviews}\n`;
+            txtContent += '========================================\n\n';
+
+            documentStructure.forEach(item => {
+                txtContent += sectionToTxtWithReviews(item, '');
+                txtContent += '\n';
+            });
+
+            txtContent += '\n========================================\n';
+            txtContent += '文件结束\n';
+            txtContent += '========================================\n';
+
+            const exportTitle = h1Title || '测试用例文档';
+            downloadFile(txtContent, `${exportTitle}_带评审.txt`, 'text/plain');
+        }
+
         function exportReviewsTxt() {
             let totalReviews = 0;
             Object.values(reviews).forEach(r => totalReviews += r.length);
